@@ -1,0 +1,34 @@
+pipeline{
+  agent any
+
+  environment {
+    SONARQUBE-SERVER="SonarQube"  // SonarQube server name in Jenkins
+    SONARQUBE-SCANNER="'/path/to/sonar-scanner' // Adjust if necessary"
+    git-repo='git@github.com:your-org/your-repo.git'
+    Project_keyName="My Netflix app"
+    ARGOCD-APP="my-argod-app"
+  }
+
+stages{
+  stage ('clone repository') {
+    steps {
+      git branch: main , url: "${git-repo}"     
+    }
+  }
+  stage ('Code Quality analysis') {
+    steps {
+      withSonarQubeEnv("${SONARQUBE-SERVER}") {
+          sh "${SONAR-SCANNER} -Dsonar.projectKey=${Project_keyName} Dsonar.source=src -Dsonar.host.url=${SONARQUBE_SERVER}"
+      } 
+    }
+  }
+}
+stage ('Quality Gates')
+  steps {
+    timeout(time: 5, unit: 'MINUTS') {
+      waitForQualityGate abortPipeline: true
+    }
+  }
+
+
+}
